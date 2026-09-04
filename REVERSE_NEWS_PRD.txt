@@ -1,0 +1,489 @@
+Your prompt is strong, and the concept is excellent for a four-hour hackathon because each required tool has a visible, meaningful role:
+
+- Linkup finds the evidence.
+- Lovable creates the experience.
+- ElevenLabs makes it memorable.
+
+The main danger is trying to build a universally accurate “causality engine.” For the hackathon, frame the output as an evidence-backed causal interpretation, not unquestionable historical truth.
+
+# Reverse News — Lean Hackathon PRD
+
+## 1. Product summary
+
+Reverse News is an interactive web experience that explains the events behind a current headline.
+
+Instead of answering “What happened?”, it asks:
+
+> **How did we get here?**
+
+The user enters a headline or topic. Reverse News searches for relevant historical reporting and creates a short, backwards-moving timeline from the present event to its earlier causes.
+
+Each event includes:
+
+- When it happened
+- A one-sentence explanation
+- Why it contributed to the next event
+- A clickable evidence source
+
+Users can scroll backward manually or listen to the chain as a short documentary narration.
+
+## 2. Problem
+
+News summaries explain the latest event but often omit the sequence of decisions, breakthroughs, competitive moves, and external pressures that made it happen.
+
+Readers therefore learn what happened without understanding why it happened.
+
+## 3. Target user
+
+The primary user is a curious news reader who sees a headline and wants the historical context without reading ten different articles.
+
+For the demo, prioritize technology and business news. Those topics tend to have:
+
+- Clear product announcements
+- Well-documented company decisions
+- Competitive events
+- Accessible historical sources
+
+Do not promise support for every news category during the hackathon.
+
+## 4. Core value proposition
+
+> Turn any major headline into a two-minute journey backward through the events that caused it.
+
+## 5. Core user journey
+
+1. User lands on the homepage.
+2. User sees the prompt: **“What happened—and how did we get here?”**
+3. User enters a headline or selects a prepared example.
+4. The app displays a brief research/loading animation.
+5. The current headline appears first.
+6. The user scrolls downward, moving backward in time.
+7. Each previous event explains why it contributed to the event above it.
+8. The user can open the supporting article for any event.
+9. The user presses **“Narrate the story”** to hear the timeline as a mini-documentary.
+
+## 6. Four-hour MVP features
+
+### Feature 1: Headline input
+
+A simple input accepting either:
+
+- A headline
+- A topic
+- Optionally, an article URL if it works easily
+
+Example:
+
+> OpenAI announces a new consumer device.
+
+Include two or three clickable example headlines underneath the input. These are vital for a reliable judging demo.
+
+### Feature 2: Reverse causal timeline
+
+Generate exactly four or five timeline events:
+
+1. Today’s event
+2. Immediate trigger
+3. Earlier industry or competitive development
+4. Foundational development
+5. Optional origin event
+
+Every card should contain:
+
+- Relative or exact date
+- Short event title
+- One-sentence description
+- A “This led to…” or “Because…” relationship
+- Source name
+- Clickable source link
+
+Keep descriptions extremely short. The timeline’s visual rhythm is more important than producing an essay.
+
+### Feature 3: Visible evidence
+
+Every historical claim should have at least one clickable source supplied through Linkup.
+
+Suggested UI:
+
+> **Evidence:** Reuters ↗
+
+This is how judges immediately understand that Linkup is doing real work rather than being mentioned invisibly in the stack.
+
+### Feature 4: Documentary narration
+
+A single **Play the story** button sends a short narration script to ElevenLabs.
+
+The narration should:
+
+- Start with today’s headline
+- Walk backward through the events
+- Run for approximately 45–75 seconds
+- Sound like a dramatic news documentary
+- Highlight the causal links
+
+For the MVP, use one fixed narrator voice. Do not build voice selection, cloning, or conversational voice controls.
+
+### Feature 5: Loading experience
+
+Research may take several seconds, so make waiting feel intentional:
+
+- “Investigating today’s headline…”
+- “Finding the immediate trigger…”
+- “Tracing the story to its origin…”
+- “Verifying sources…”
+
+This can be a timed animation; it does not need real progress tracking.
+
+### Feature 6: Demo fallback
+
+Maintain one pre-generated, guaranteed-working story.
+
+If live research fails during judging, a **Try an example** button should instantly load the prepared timeline and narration.
+
+This is not optional hackathon polish—it is demo insurance.
+
+## 7. Features explicitly out of scope
+
+Do not build these during the four-hour sprint:
+
+- User accounts
+- Saved history
+- Database
+- Social sharing
+- Multiple narrator voices
+- Voice cloning
+- Timeline editing
+- Maps or network graphs
+- Comparison between headlines
+- Collaborative research
+- Infinite timeline depth
+- Automated fact-checking
+- Support for every language
+- Mobile-native application
+
+If everything works early, the best stretch feature is a shareable timeline image or link—not another research mode.
+
+## 8. Output structure
+
+Have the research endpoint return a predictable object such as:
+
+```json
+{
+  "headline": "OpenAI announces X",
+  "summary": "A one-sentence framing of the story.",
+  "events": [
+    {
+      "date": "Today",
+      "title": "OpenAI announces X",
+      "description": "What happened.",
+      "causal_link": "The immediate outcome of earlier developments.",
+      "source_name": "Source",
+      "source_url": "https://example.com"
+    }
+  ],
+  "narration_script": "Today, OpenAI announced..."
+}
+```
+
+Require:
+
+- Four or five events only
+- Newest-to-oldest order
+- One source per event
+- No claim without a supporting URL
+- Concise text suitable for timeline cards
+
+If the evidence is weak, omit an event instead of inventing a connection.
+
+## 9. Causality language
+
+This detail will improve both credibility and judging.
+
+Use language such as:
+
+- “helped set the stage for”
+- “increased pressure on”
+- “made this technically possible”
+- “prompted the company to”
+- “was an early foundation for”
+
+Avoid claiming that one event definitively caused another unless the source explicitly supports that conclusion.
+
+A small label could say:
+
+> **Evidence-backed interpretation**
+
+## 10. Visual direction
+
+The reference image suggests a dark event aesthetic, which fits nicely. I would make the app feel like a cinematic investigative documentary:
+
+- Near-black background
+- Large editorial typography
+- One bright accent color
+- Thin vertical timeline
+- Oversized date markers
+- Subtle grain or glow
+- Cards revealing as the user scrolls
+- Animated line connecting the events
+- A persistent audio control at the bottom
+
+The key visual behavior is that the first card says **TODAY**, but scrolling downward moves further into the past. That inversion is the product’s signature interaction.
+
+Possible homepage copy:
+
+> **Every headline has a history.**
+
+> Enter today’s news. Trace the chain backward.
+
+## 11. Recommended stack
+
+| Layer | Choice | Purpose |
+|---|---|---|
+| UI and hosting | Lovable | Generate and deploy the complete web experience |
+| Frontend | React + TypeScript generated by Lovable | Input, timeline, loading state, audio controls |
+| Styling | Tailwind/shadcn through Lovable | Fast visual iteration |
+| Backend | Lovable Cloud or one Supabase Edge Function | Securely call external APIs |
+| Research | Linkup Search API | Find current and historical sources and synthesize evidence |
+| Narration | ElevenLabs Text-to-Speech API | Convert the timeline script to audio |
+| Database | None | Unnecessary for the demo |
+| Authentication | None | Unnecessary for the demo |
+
+Use one backend function if possible:
+
+```text
+/research
+  → calls Linkup
+  → normalizes the timeline
+  → returns timeline JSON
+```
+
+And one narration function:
+
+```text
+/narrate
+  → receives narration_script
+  → calls ElevenLabs
+  → returns playable audio
+```
+
+API keys must stay in Lovable Cloud or Supabase secrets, never in browser code. Lovable officially supports authenticated third-party APIs through server-side functions and managed secrets. [Lovable integration documentation](https://docs.lovable.dev/integrations/introduction)
+
+Linkup recommends choosing search depth based on complexity. Start with `standard`; only use deeper research if the normal request is inadequate, since deep research can be much slower. [Linkup search guidance](https://docs.linkup.so/pages/documentation/endpoints/search/best-practices)
+
+For ElevenLabs, use a fixed voice and a direct text-to-speech request returning MP3. Flash v2.5 is optimized for low latency, while Multilingual v2 prioritizes stable long-form narration. For this short live demo, Flash is the sensible starting point. [ElevenLabs TTS documentation](https://elevenlabs.io/docs/overview/capabilities/text-to-speech)
+
+## 12. Product requirements
+
+The demo is successful when:
+
+- A user can submit a prepared headline.
+- A timeline appears in under approximately 20 seconds.
+- It contains at least four chronologically correct events.
+- Each event has a working evidence link.
+- Events appear newest-to-oldest.
+- The page visibly communicates “because” between events.
+- The ElevenLabs narration plays successfully.
+- The experience works on the presentation laptop.
+- A fallback example works without live API calls.
+
+## 13. Four-hour schedule
+
+### 0:00–0:20 — Align
+
+Everyone agrees on:
+
+- One demo headline
+- Four-event timeline structure
+- Visual direction
+- Exact output format
+- One ElevenLabs voice
+- Who owns each integration
+
+Create the shared Lovable project and exchange API access immediately.
+
+### 0:20–1:20 — Parallel building
+
+- Person 1: Linkup/backend
+- Person 2: Lovable interface
+- Person 3: ElevenLabs/audio
+- Person 4: research, copy, demo story, and pitch
+
+### 1:20–2:20 — Integration
+
+Connect:
+
+- Headline input → research endpoint
+- Research response → timeline
+- Narration script → ElevenLabs endpoint
+- Audio response → player
+
+Person 4 checks claims and sources while integration happens.
+
+### 2:20–3:05 — Polish
+
+- Loading states
+- Scroll animation
+- Error message
+- Evidence links
+- Responsive layout
+- Prepared fallback story
+
+Freeze the feature set at the end of this period.
+
+### 3:05–3:35 — Test
+
+Test the exact demo flow several times:
+
+- Fresh page load
+- API keys
+- Research response
+- Source links
+- Narration playback
+- Projected-screen readability
+- Fallback behavior
+
+### 3:35–4:00 — Rehearse
+
+Run the pitch three times and change only critical problems.
+
+Do not make visual or architectural changes during the final 25 minutes.
+
+# Team roles
+
+## Person 1 — Technical lead and integrator
+
+**Goal:** Make the complete end-to-end flow work.
+
+You should own the riskiest dependency: turning Linkup results into clean timeline data.
+
+Tasks:
+
+1. Create the Lovable project and establish the shared output schema.
+2. Configure backend secrets for Linkup and ElevenLabs.
+3. Build or direct Lovable to build the `/research` server function.
+4. Prompt Linkup to return four or five sourced historical events.
+5. Normalize the result into predictable JSON.
+6. Connect the research output to Person 2’s timeline.
+7. Help Person 3 connect narration.
+8. Handle final deployment and integration bugs.
+9. Decide when to cut features.
+
+Do not spend the first hour perfecting architecture. Your job is to eliminate integration risk early.
+
+## Person 2 — Product designer and Lovable UI owner
+
+**Goal:** Make Reverse News visually unforgettable and presentation-ready.
+
+Tasks:
+
+1. Build the landing page in Lovable.
+2. Create the headline input and example-headline buttons.
+3. Build a reusable timeline card.
+4. Arrange the cards newest-to-oldest.
+5. Add the central line, “because” transitions, and scroll reveals.
+6. Design loading, error, and empty states.
+7. Add source links and the audio-player area.
+8. Test the layout on the laptop and a phone-sized viewport.
+9. Work with Person 4 on final interface copy.
+
+Give Lovable one screen or component at a time. Avoid repeatedly asking it to redesign the entire app.
+
+## Person 3 — API and QA engineer
+
+**Goal:** Make narration work reliably and prevent the live demo from breaking.
+
+This is a bounded technical assignment suitable for a first hackathon.
+
+Tasks:
+
+1. Get one ElevenLabs text-to-speech call working immediately.
+2. Select one narrator voice.
+3. Create the `/narrate` server function with Person 1’s help.
+4. Accept `narration_script` and return playable MP3 audio.
+5. Connect play, pause, loading, and error states.
+6. Generate and save the narration for the fallback example.
+7. Test the full app with at least three headlines.
+8. Maintain a simple bug checklist.
+9. Confirm that API keys are not exposed in frontend code.
+
+If live narration is troublesome, pre-generate the demo story audio and keep the button working with that asset.
+
+## Person 4 — Research producer and pitch lead
+
+**Goal:** Make the story credible, understandable, and compelling to judges.
+
+This is not a filler role; it owns the content quality and presentation.
+
+Tasks:
+
+1. Choose the strongest demo headline with Person 1.
+2. Manually research the ideal four-step causal chain.
+3. Check that every timeline source actually supports its event.
+4. Rewrite card descriptions so a general audience understands them.
+5. Write the 45–75 second documentary narration.
+6. Create the pre-generated fallback story data.
+7. Write the three-minute pitch.
+8. Prepare likely judge questions and answers.
+9. Present or co-present the demo.
+
+Their international business background is useful for spotting market pressure, competitive moves, regulation, and global events that connect the timeline.
+
+# Recommended demo pitch
+
+> News tells us what happened today. But today did not appear from nowhere.
+
+Enter the headline.
+
+> Reverse News uses Linkup to find the evidence behind the story.
+
+Scroll through the timeline.
+
+> Instead of summarizing forward, it takes us backward—from the announcement, to the competitive pressure, to the breakthrough, to the moment the story really began.
+
+Start ElevenLabs narration.
+
+> Lovable transforms that research into an interactive timeline, while ElevenLabs turns it into a documentary you can listen to.
+
+Finish with:
+
+> Reverse News doesn’t just tell you what happened. It helps you understand how we got here.
+
+# What you should decide next
+
+Your original prompt is already good. Before building, add decisions for these five items:
+
+1. **Demo headline:** Pick one visually and historically compelling topic.
+2. **Input scope:** Headline only, or headline plus URL? I recommend headline only.
+3. **Timeline length:** Fix it at four events, with a fifth only when evidence is strong.
+4. **Narration strategy:** Live generation plus pre-generated fallback.
+5. **Truth framing:** Label the output an evidence-backed interpretation.
+
+My strongest recommendation is to make the app feel deep while keeping the system shallow: one input, four beautiful cards, four real sources, and one excellent narration. That is enough for a memorable hackathon demo.
+
+Goal completed in about 27 seconds of active work; 24,467 tokens were used.
+
+# Implementation scaffold added
+
+The repository now contains a working Vite + React + TypeScript frontend and a small Express server for the two external integrations.
+
+## Implemented
+
+- Cinematic responsive landing page and backwards timeline
+- Headline input with suggested prompts
+- Four-event guaranteed demo story
+- Loading, error, live/demo, and audio states
+- `POST /api/research` using Linkup structured search at standard depth
+- `POST /api/narrate` using ElevenLabs Flash v2.5 text-to-speech
+- Server-side environment variables so API keys never enter frontend code
+- TypeScript build configuration and local development scripts
+
+## Local setup
+
+1. Install Node.js 18 or newer.
+2. Run `npm install`.
+3. Copy `.env.example` to `.env`.
+4. Add `LINKUP_API_KEY` and `ELEVENLABS_API_KEY` to `.env` when available.
+5. Run `npm run dev`.
+6. Open `http://localhost:5173`.
+
+Without API keys, use “open the guaranteed demo story” to review the complete interface. The health endpoint at `http://localhost:8787/api/health` confirms which integrations are configured without revealing secret values.

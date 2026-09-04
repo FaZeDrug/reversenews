@@ -1,6 +1,7 @@
 import "dotenv/config";
 import cors from "cors";
 import express from "express";
+import { extractTopic } from "./topic.js";
 
 const app = express();
 const port = Number(process.env.PORT || 8787);
@@ -285,11 +286,40 @@ async function fallbackTimeline(topic, { mode, focus }) {
   return buildStory(topic, events, { kind: mode });
 }
 
+function audioFilename(mime) {
+  if (String(mime).includes("mp4") || String(mime).includes("m4a")) return "speech.m4a";
+  if (String(mime).includes("mpeg") || String(mime).includes("mp3")) return "speech.mp3";
+  if (String(mime).includes("wav")) return "speech.wav";
+  if (String(mime).includes("ogg")) return "speech.ogg";
+  return "speech.webm";
+}
+
+async function transcribeSpeech(buffer, mime) {
+  const models = ["scribe_v2", "scribe_v1"];
+  let lastError = new Error("ElevenLabs transcription failed");
+  for (const model of models) {
+    const form = new FormData();
+    form.append("file", new Blob([buffer], { type: mime || "audio/webm" }), audioFilename(mime));
+    form.append("model_id", model);
+    form.append("language_code", "eng");
+    const api = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
+      method: "POST",
+      headers: { "xi-api-key": process.env.ELEVENLABS_API_KEY },
+      body: form,
+    });
+    const data = await api.json().catch(() => ({}));
+    if (api.ok && data.text) return String(data.text).trim();
+    lastError = new Error(data?.detail?.message || data?.message || `ElevenLabs transcription failed (${api.status})`);
+  }
+  throw lastError;
+}
+
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
     linkup: Boolean(process.env.LINKUP_API_KEY),
     elevenLabs: Boolean(process.env.ELEVENLABS_API_KEY),
+    voiceSearch: Boolean(process.env.ELEVENLABS_API_KEY),
   });
 });
 
@@ -314,6 +344,39 @@ app.post("/api/research", async (req, res) => {
   } catch (error) {
     console.error("Linkup error:", error);
     res.status(502).json({ error: error instanceof Error ? error.message : "Unable to research this headline." });
+  }
+});
+
+function maybeRawAudio(req, res, next) {
+  if (String(req.headers["content-type"] || "").includes("application/json")) return next();
+  return express.raw({ type: () => true, limit: "8mb" })(req, res, next);
+}
+
+app.post("/api/voice-search", maybeRawAudio, async (req, res) => {
+  if (!process.env.ELEVENLABS_API_KEY) {
+    return res.status(503).json({ error: "Voice search needs ELEVENLABS_API_KEY in .env." });
+  }
+
+  const jsonBody = req.body && !Buffer.isBuffer(req.body) ? req.body : null;
+  if (jsonBody && typeof jsonBody.transcript === "string") {
+    const transcript = jsonBody.transcript.trim();
+    if (!transcript) return res.status(400).json({ error: "Nothing to search." });
+    return res.json({ transcript, topic: extractTopic(transcript) });
+  }
+
+  const audio = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || []);
+  if (audio.length < 64) {
+    return res.status(400).json({ error: "That recording was too short. Try again." });
+  }
+
+  try {
+    const transcript = await transcribeSpeech(audio, req.headers["content-type"] || "audio/webm");
+    const topic = extractTopic(transcript);
+    if (!topic) return res.status(422).json({ error: "Couldn't find a topic in that. Try naming the subject.", transcript });
+    res.json({ transcript, topic });
+  } catch (error) {
+    console.error("Voice search error:", error);
+    res.status(502).json({ error: error instanceof Error ? error.message : "Unable to transcribe that." });
   }
 });
 
@@ -355,6 +418,10 @@ app.post("/api/narrate", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Reverse News API listening on http://localhost:${port}`);
-});
+export default app;
+
+if (!process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Reverse News API listening on http://localhost:${port}`);
+  });
+}
